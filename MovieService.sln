@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieService", "MovieService\MovieService.csproj", "{58B45A43-760A-4F8F-8A5A-09F635D77527}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieClient", "MovieClient\MovieClient.csproj", "{88DF8B91-C3CD-459A-9188-742CD0DB285D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{58B45A43-760A-4F8F-8A5A-09F635D77527}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58B45A43-760A-4F8F-8A5A-09F635D77527}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58B45A43-760A-4F8F-8A5A-09F635D77527}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58B45A43-760A-4F8F-8A5A-09F635D77527}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88DF8B91-C3CD-459A-9188-742CD0DB285D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88DF8B91-C3CD-459A-9188-742CD0DB285D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88DF8B91-C3CD-459A-9188-742CD0DB285D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88DF8B91-C3CD-459A-9188-742CD0DB285D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
