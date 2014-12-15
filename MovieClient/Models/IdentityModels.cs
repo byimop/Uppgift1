@@ -29,5 +29,11 @@ namespace MovieClient.Models
         {
             return new ApplicationDbContext();
         }
+
+        public System.Data.Entity.DbSet<MovieClient.Models.MovieDetailViewModel> MovieDetailViewModels { get; set; }
+
+        public System.Data.Entity.DbSet<MovieClient.Models.MovieViewModel> MovieViewModels { get; set; }
+
+        public System.Data.Entity.DbSet<MovieClient.Models.DirectorViewModel> DirectorViewModels { get; set; }
     }
 }
