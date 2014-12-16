@@ -56,9 +56,25 @@ namespace MovieClient.Controllers
         }
 
         // GET: MovieViewModels/Create
-        public ActionResult Create()
+        public async Task<ActionResult> Create()
         {
-            return View();
+            // ViewBag.DirectorId = new SelectList(db.DirectorViewModels, "Id", "Name", movie.DirectorId);
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri("http://localhost:50658/");
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                HttpResponseMessage response = await client.GetAsync("api/Directors/");
+                if (response.IsSuccessStatusCode)
+                {
+                    List<DirectorViewModel> directorList = await response.Content.ReadAsAsync<List<DirectorViewModel>>();
+                    ViewBag.DirectorId = new SelectList(directorList, "Id", "Name");
+                    return View();
+                }
+            }
+            return HttpNotFound();
         }
 
         // POST: MovieViewModels/Create
@@ -82,8 +98,6 @@ namespace MovieClient.Controllers
                         return RedirectToAction("Index");
                     }
                 }
-
-                // ViewBag.DirectorId = new SelectList(db.DirectorViewModels, "Id", "Name", movie.DirectorId);
             }
             return HttpNotFound();
         }
@@ -116,6 +130,7 @@ namespace MovieClient.Controllers
                         {
                             id2 = id.Value;
                         }
+                        ViewBag.DirectorId = new SelectList(directorsList, "Id", "Name", dId);
                         Movie movie = new Movie
                         {
                             Id = id2,
