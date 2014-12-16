@@ -26,7 +26,7 @@ namespace MovieClient.Controllers
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                HttpResponseMessage response = await client.GetAsync("api/Movies");
+                HttpResponseMessage response = await client.GetAsync("api/Movies/");
                 if (response.IsSuccessStatusCode)
                 {
                     List<MovieViewModel> movies = await response.Content.ReadAsAsync<List<MovieViewModel>>();
@@ -148,16 +148,10 @@ namespace MovieClient.Controllers
                     client.DefaultRequestHeaders.Accept.Clear();
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                   // DirectorViewModel dir = new DirectorViewModel { Id = 2, Name = "Nisse" };
-                   // movie.Director = dir;
-
                     // HTTP PUT
                     HttpResponseMessage response = await client.PutAsJsonAsync("api/Movies/" + movie.Id, movie);
                     if (response.IsSuccessStatusCode)
                     {
-                        //Uri movieUrl = response.Headers.Location;
-                        //var 
-                        //response = await client.PutAsJsonAsync(movieUrl, movie);
                         return RedirectToAction("Index");
                     }
                 }
@@ -193,10 +187,6 @@ namespace MovieClient.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> DeleteConfirmed(int id)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
             using (var client = new HttpClient())
             {
                 client.BaseAddress = new Uri("http://localhost:50658/");
@@ -211,14 +201,5 @@ namespace MovieClient.Controllers
             }
             return HttpNotFound();
         }
-
-        //protected override void Dispose(bool disposing)
-        //{
-        //    if (disposing)
-        //    {
-        //        db.Dispose();
-        //    }
-        //    base.Dispose(disposing);
-        //}
     }
 }

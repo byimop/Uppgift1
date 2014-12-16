@@ -37,18 +37,28 @@ namespace MovieClient.Controllers
         }
 
         // GET: DirectorViewModels/Details/5
-        public ActionResult Details(int? id)
+        public async Task< ActionResult> Details(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            DirectorViewModel directorViewModel = db.DirectorViewModels.Find(id);
-            if (directorViewModel == null)
+            using (var client = new HttpClient())
             {
-                return HttpNotFound();
+                client.BaseAddress = new Uri("http://localhost:50658/");
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                HttpResponseMessage response = await client.GetAsync("api/Directors/" + id);
+                if (response.IsSuccessStatusCode)
+                {
+                    DirectorViewModel director = await response.Content.ReadAsAsync<DirectorViewModel>();
+                    return View(director);
+                }
             }
-            return View(directorViewModel);
+
+                return HttpNotFound();
+
         }
 
         // GET: DirectorViewModels/Create
@@ -62,31 +72,51 @@ namespace MovieClient.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,Name")] DirectorViewModel directorViewModel)
+        public async Task<ActionResult> Create([Bind(Include = "Id,Name")] DirectorViewModel directorViewModel)
         {
             if (ModelState.IsValid)
             {
-                db.DirectorViewModels.Add(directorViewModel);
-                db.SaveChanges();
-                return RedirectToAction("Index");
-            }
+                using (var client = new HttpClient())
+                {
+                    client.BaseAddress = new Uri("http://localhost:50658/");
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            return View(directorViewModel);
+                    HttpResponseMessage response = await client.PostAsJsonAsync("api/Directors/", directorViewModel);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return RedirectToAction("Index");
+                    }
+                }
+
+                // ViewBag.DirectorId = new SelectList(db.DirectorViewModels, "Id", "Name", movie.DirectorId);
+            }
+            return HttpNotFound();
+
+
         }
 
         // GET: DirectorViewModels/Edit/5
-        public ActionResult Edit(int? id)
+        public async Task<ActionResult> Edit(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            DirectorViewModel directorViewModel = db.DirectorViewModels.Find(id);
-            if (directorViewModel == null)
+            using (var client = new HttpClient())
             {
-                return HttpNotFound();
+                client.BaseAddress = new Uri("http://localhost:50658/");
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                HttpResponseMessage response = await client.GetAsync("api/Directors/" + id);
+                if (response.IsSuccessStatusCode)
+                {
+                    DirectorViewModel director = await response.Content.ReadAsAsync<DirectorViewModel>();
+                    return View(director);
+                }
             }
-            return View(directorViewModel);
+            return HttpNotFound();
         }
 
         // POST: DirectorViewModels/Edit/5
@@ -94,50 +124,68 @@ namespace MovieClient.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,Name")] DirectorViewModel directorViewModel)
+        public async Task<ActionResult> Edit([Bind(Include = "Id,Name")] DirectorViewModel directorViewModel)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(directorViewModel).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                using (var client = new HttpClient())
+                {
+                    client.BaseAddress = new Uri("http://localhost:50658/");
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    // HTTP PUT
+                    HttpResponseMessage response = await client.PutAsJsonAsync("api/Directors/" + directorViewModel.Id, directorViewModel);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return RedirectToAction("Index");
+                    }
+                }
             }
-            return View(directorViewModel);
+            return HttpNotFound();
         }
 
         // GET: DirectorViewModels/Delete/5
-        public ActionResult Delete(int? id)
+        public async Task<ActionResult> Delete(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            DirectorViewModel directorViewModel = db.DirectorViewModels.Find(id);
-            if (directorViewModel == null)
+            using (var client = new HttpClient())
             {
-                return HttpNotFound();
+                client.BaseAddress = new Uri("http://localhost:50658/");
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                HttpResponseMessage response = await client.GetAsync("api/Directors/" + id);
+                if (response.IsSuccessStatusCode)
+                {
+                    DirectorViewModel director = await response.Content.ReadAsAsync<DirectorViewModel>();
+                    return View(director);
+                }
             }
-            return View(directorViewModel);
+            return HttpNotFound();
         }
 
         // POST: DirectorViewModels/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
+        public async Task<ActionResult> DeleteConfirmed(int id)
         {
-            DirectorViewModel directorViewModel = db.DirectorViewModels.Find(id);
-            db.DirectorViewModels.Remove(directorViewModel);
-            db.SaveChanges();
-            return RedirectToAction("Index");
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
+            using (var client = new HttpClient())
             {
-                db.Dispose();
+                client.BaseAddress = new Uri("http://localhost:50658/");
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                HttpResponseMessage response = await client.DeleteAsync("api/Directors/" + id);
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToAction("Index");
+                }
             }
-            base.Dispose(disposing);
+            return HttpNotFound();
         }
     }
 }
