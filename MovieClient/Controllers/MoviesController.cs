@@ -7,126 +7,115 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using MovieClient.Models;
-using System.Threading.Tasks;
-using System.Net.Http;
-using System.Net.Http.Headers;
 
 namespace MovieClient.Controllers
 {
-    public class DirectorViewModelsController : Controller
+    public class MoviesController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
 
-        // GET: DirectorViewModels
-        public async Task<ActionResult> Index()
+        // GET: Movies
+        public ActionResult Index()
         {
-            using (var client = new HttpClient())
-            {
-                client.BaseAddress = new Uri("http://localhost:50658/");
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                HttpResponseMessage response = await client.GetAsync("api/Directors");
-                if (response.IsSuccessStatusCode)
-                {
-                    List<DirectorViewModel> directors = await response.Content.ReadAsAsync<List<DirectorViewModel>>();
-                    return View(directors);
-                }
-            }
-            return HttpNotFound();
+            var movies = db.Movies.Include(m => m.Director);
+            return View(movies.ToList());
         }
 
-        // GET: DirectorViewModels/Details/5
+        // GET: Movies/Details/5
         public ActionResult Details(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            DirectorViewModel directorViewModel = db.DirectorViewModels.Find(id);
-            if (directorViewModel == null)
+            Movie movie = db.Movies.Find(id);
+            if (movie == null)
             {
                 return HttpNotFound();
             }
-            return View(directorViewModel);
+            return View(movie);
         }
 
-        // GET: DirectorViewModels/Create
+        // GET: Movies/Create
         public ActionResult Create()
         {
+            ViewBag.DirectorId = new SelectList(db.DirectorViewModels, "Id", "Name");
             return View();
         }
 
-        // POST: DirectorViewModels/Create
+        // POST: Movies/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,Name")] DirectorViewModel directorViewModel)
+        public ActionResult Create([Bind(Include = "Id,Title,Year,Price,Genre,DirectorId")] Movie movie)
         {
             if (ModelState.IsValid)
             {
-                db.DirectorViewModels.Add(directorViewModel);
+                db.Movies.Add(movie);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
-            return View(directorViewModel);
+            ViewBag.DirectorId = new SelectList(db.DirectorViewModels, "Id", "Name", movie.DirectorId);
+            return View(movie);
         }
 
-        // GET: DirectorViewModels/Edit/5
+        // GET: Movies/Edit/5
         public ActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            DirectorViewModel directorViewModel = db.DirectorViewModels.Find(id);
-            if (directorViewModel == null)
+            Movie movie = db.Movies.Find(id);
+            if (movie == null)
             {
                 return HttpNotFound();
             }
-            return View(directorViewModel);
+            ViewBag.DirectorId = new SelectList(db.DirectorViewModels, "Id", "Name", movie.DirectorId);
+            return View(movie);
         }
 
-        // POST: DirectorViewModels/Edit/5
+        // POST: Movies/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,Name")] DirectorViewModel directorViewModel)
+        public ActionResult Edit([Bind(Include = "Id,Title,Year,Price,Genre,DirectorId")] Movie movie)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(directorViewModel).State = EntityState.Modified;
+                db.Entry(movie).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            return View(directorViewModel);
+            ViewBag.DirectorId = new SelectList(db.DirectorViewModels, "Id", "Name", movie.DirectorId);
+            return View(movie);
         }
 
-        // GET: DirectorViewModels/Delete/5
+        // GET: Movies/Delete/5
         public ActionResult Delete(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            DirectorViewModel directorViewModel = db.DirectorViewModels.Find(id);
-            if (directorViewModel == null)
+            Movie movie = db.Movies.Find(id);
+            if (movie == null)
             {
                 return HttpNotFound();
             }
-            return View(directorViewModel);
+            return View(movie);
         }
 
-        // POST: DirectorViewModels/Delete/5
+        // POST: Movies/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            DirectorViewModel directorViewModel = db.DirectorViewModels.Find(id);
-            db.DirectorViewModels.Remove(directorViewModel);
+            Movie movie = db.Movies.Find(id);
+            db.Movies.Remove(movie);
             db.SaveChanges();
             return RedirectToAction("Index");
         }

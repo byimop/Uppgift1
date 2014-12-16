@@ -66,31 +66,71 @@ namespace MovieClient.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,Title,DirectorName")] MovieViewModel movieViewModel)
+        public async Task<ActionResult> Create([Bind(Include = "Id,Title,Year,Price,Genre,DirectorId")] Movie movie)
         {
             if (ModelState.IsValid)
             {
-                db.MovieViewModels.Add(movieViewModel);
-                db.SaveChanges();
-                return RedirectToAction("Index");
-            }
+                using (var client = new HttpClient())
+                {
+                    client.BaseAddress = new Uri("http://localhost:50658/");
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            return View(movieViewModel);
+                    HttpResponseMessage response = await client.PostAsJsonAsync("api/Movies/", movie);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return RedirectToAction("Index");
+                    }
+                }
+
+                // ViewBag.DirectorId = new SelectList(db.DirectorViewModels, "Id", "Name", movie.DirectorId);
+            }
+            return HttpNotFound();
         }
 
         // GET: MovieViewModels/Edit/5
-        public ActionResult Edit(int? id)
+        public async Task<ActionResult> Edit(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            MovieViewModel movieViewModel = db.MovieViewModels.Find(id);
-            if (movieViewModel == null)
+
+            using (var client = new HttpClient())
             {
-                return HttpNotFound();
+                client.BaseAddress = new Uri("http://localhost:50658/");
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                HttpResponseMessage response = await client.GetAsync("api/Movies/" + id);
+                if (response.IsSuccessStatusCode)
+                {
+                    MovieDetailViewModel movieViewModel = await response.Content.ReadAsAsync<MovieDetailViewModel>();
+                    response = await client.GetAsync("api/Directors");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        List<DirectorViewModel> directorsList = await response.Content.ReadAsAsync<List<DirectorViewModel>>();
+                        var dId = directorsList.Where(d => d.Name == movieViewModel.DirectorName).FirstOrDefault().Id;
+                        int id2 = 0;
+                        if (id.HasValue)
+                        {
+                            id2 = id.Value;
+                        }
+                        Movie movie = new Movie
+                        {
+                            Id = id2,
+                            Title = movieViewModel.Title,
+                            Year = movieViewModel.Year,
+                            Price = movieViewModel.Price,
+                            Genre = movieViewModel.Genre,
+                            DirectorId = dId
+                        };
+                        return View(movie);
+                    }
+                }
             }
-            return View(movieViewModel);
+            return HttpNotFound();
+
         }
 
         // POST: MovieViewModels/Edit/5
@@ -98,50 +138,87 @@ namespace MovieClient.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,Title,DirectorName")] MovieViewModel movieViewModel)
+        public async Task<ActionResult> Edit([Bind(Include = "Id,Title,DirectorId, Genre, Price, Year")] Movie movie)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(movieViewModel).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                using (var client = new HttpClient())
+                {
+                    client.BaseAddress = new Uri("http://localhost:50658/");
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                   // DirectorViewModel dir = new DirectorViewModel { Id = 2, Name = "Nisse" };
+                   // movie.Director = dir;
+
+                    // HTTP PUT
+                    HttpResponseMessage response = await client.PutAsJsonAsync("api/Movies/" + movie.Id, movie);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        //Uri movieUrl = response.Headers.Location;
+                        //var 
+                        //response = await client.PutAsJsonAsync(movieUrl, movie);
+                        return RedirectToAction("Index");
+                    }
+                }
             }
-            return View(movieViewModel);
+            return HttpNotFound();
         }
 
         // GET: MovieViewModels/Delete/5
-        public ActionResult Delete(int? id)
+        public async Task<ActionResult> Delete(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            MovieViewModel movieViewModel = db.MovieViewModels.Find(id);
-            if (movieViewModel == null)
+            using (var client = new HttpClient())
             {
-                return HttpNotFound();
+                client.BaseAddress = new Uri("http://localhost:50658/");
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                HttpResponseMessage response = await client.GetAsync("api/Movies/" + id);
+                if (response.IsSuccessStatusCode)
+                {
+                    MovieViewModel movies = await response.Content.ReadAsAsync<MovieViewModel>();
+                    return View(movies);
+                }
             }
-            return View(movieViewModel);
+            return HttpNotFound();
         }
 
         // POST: MovieViewModels/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
+        public async Task<ActionResult> DeleteConfirmed(int id)
         {
-            MovieViewModel movieViewModel = db.MovieViewModels.Find(id);
-            db.MovieViewModels.Remove(movieViewModel);
-            db.SaveChanges();
-            return RedirectToAction("Index");
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri("http://localhost:50658/");
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                HttpResponseMessage response = await client.DeleteAsync("api/Movies/" + id);
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToAction("Index");
+                }
+            }
+            return HttpNotFound();
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+        //protected override void Dispose(bool disposing)
+        //{
+        //    if (disposing)
+        //    {
+        //        db.Dispose();
+        //    }
+        //    base.Dispose(disposing);
+        //}
     }
 }

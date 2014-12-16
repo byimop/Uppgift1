@@ -35,5 +35,7 @@ namespace MovieClient.Models
         public System.Data.Entity.DbSet<MovieClient.Models.MovieViewModel> MovieViewModels { get; set; }
 
         public System.Data.Entity.DbSet<MovieClient.Models.DirectorViewModel> DirectorViewModels { get; set; }
+
+        public System.Data.Entity.DbSet<MovieClient.Models.Movie> Movies { get; set; }
     }
 }
